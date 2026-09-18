@@ -32431,12 +32431,20 @@ BTC is currently around $65,000 based on latest tool output."#
         hooks.register(Box::new(PanicOnceRoomMergeHook {
             panicked: Arc::clone(&panicked),
         }));
+        let mut prompt_config = zeroclaw_config::schema::Config::default();
+        prompt_config.channels.telegram.insert(
+            "default".into(),
+            zeroclaw_config::schema::TelegramConfig {
+                interrupt_on_new_message: true,
+                ..Default::default()
+            },
+        );
         let mut ctx = test_runtime_ctx_with_config_agent_and_provider_ref(
             channel,
             Arc::new(SlowModelProvider {
                 delay: Duration::from_millis(10),
             }),
-            zeroclaw_config::schema::Config::default(),
+            prompt_config,
             zeroclaw_config::schema::AliasedAgentConfig::default(),
             "test-provider",
             Some(Arc::new(hooks)),
