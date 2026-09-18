@@ -30263,6 +30263,15 @@ BTC is currently around $65,000 based on latest tool output."#
         let mut channels_by_name = HashMap::new();
         channels_by_name.insert(channel.name().to_string(), channel);
 
+        let mut prompt_config = zeroclaw_config::schema::Config::default();
+        prompt_config.channels.telegram.insert(
+            "default".into(),
+            zeroclaw_config::schema::TelegramConfig {
+                interrupt_on_new_message: true,
+                ..Default::default()
+            },
+        );
+
         let runtime_ctx = Arc::new(ChannelRuntimeContext {
             channels_by_name: Arc::new(channels_by_name),
             model_provider: Arc::new(SlowModelProvider {
@@ -30300,7 +30309,7 @@ BTC is currently around $65,000 based on latest tool output."#
             reliability: Arc::new(zeroclaw_config::schema::ReliabilityConfig::default()),
             provider_runtime_options: zeroclaw_providers::ModelProviderRuntimeOptions::default(),
             workspace_dir: Arc::new(std::env::temp_dir()),
-            prompt_config: Arc::new(zeroclaw_config::schema::Config::default()),
+            prompt_config: Arc::new(prompt_config),
             message_timeout_secs: CHANNEL_MESSAGE_TIMEOUT_SECS,
             interrupt_on_new_message: InterruptOnNewMessageConfig {
                 telegram: true,
@@ -32020,10 +32029,18 @@ BTC is currently around $65,000 based on latest tool output."#
     ) -> Arc<ChannelRuntimeContext> {
         let mut hooks = zeroclaw_runtime::hooks::HookRunner::new();
         hooks.register(Box::new(hook));
+        let mut prompt_config = zeroclaw_config::schema::Config::default();
+        prompt_config.channels.telegram.insert(
+            "default".into(),
+            zeroclaw_config::schema::TelegramConfig {
+                interrupt_on_new_message: true,
+                ..Default::default()
+            },
+        );
         let mut ctx = test_runtime_ctx_with_config_agent_and_provider_ref(
             channel,
             provider,
-            zeroclaw_config::schema::Config::default(),
+            prompt_config,
             zeroclaw_config::schema::AliasedAgentConfig::default(),
             "test-provider",
             Some(Arc::new(hooks)),
